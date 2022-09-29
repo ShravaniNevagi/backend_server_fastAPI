@@ -67,6 +67,7 @@ def update_config_path(db: Session, expno: int, dir: str):
 
     return item_to_update
 
+
 def update_token(db: Session, expno: int):
     exp_uuid = db.query(models.Experiment).filter(
         models.Experiment.experiment_no == expno).first()
@@ -74,14 +75,14 @@ def update_token(db: Session, expno: int):
     ip = '127.0.0.1'
     port = '8000'
     delim = "+"
-    token = str(exp_uuid) + delim + ip + delim +  port
+    token = str(exp_uuid) + delim + ip + delim + port
     exptoken = db.query(models.Experiment).filter(
         models.Experiment.experiment_no == expno).first()
     exptoken.token = token
 
     db.commit()
     return token
-    
+
 
 def update_configuration(db: Session, expno: int):
 
@@ -139,9 +140,9 @@ def save_file(db: Session, experiment_no: int, uploaded_file: File(...)):
     with open(file_location, "wb+") as file_object:
         file_object.write(uploaded_file.file.read())
 
-    if  uploaded_file.endswith('.h5')::
-        #zip
-    return "file uploaded"
+    if uploaded_file.endswith('.h5'):
+        # zip
+        return "file uploaded"
 
 
 def create_config_file(db: Session, model: schemas.CreateConfigFile, project_name: str, experiment_name: str):
@@ -165,17 +166,19 @@ def get_runs(db: Session):
 def create_run(db: Session, run: schemas.RunCreate, experiment_no: int):
 
     db_run = models.Run(**run.dict(), experiment_no=experiment_no)
-    num = db.query(models.Run).filter(models.Run.experiment_no ==experiment_no ).count()
+    num = db.query(models.Run).filter(
+        models.Run.experiment_no == experiment_no).count()
 
     db_run.run_name = f'run{num+1}'
     db.add(db_run)
     db.commit()
     db.refresh(db_run)
-    
+
     runname = db_run.run_name
 
-    exp = db.query(models.Experiment).filter(models.Experiment.experiment_no == experiment_no).first()
-    
+    exp = db.query(models.Experiment).filter(
+        models.Experiment.experiment_no == experiment_no).first()
+
     expname = exp.experiment_name
     project_id = exp.project_id
 
@@ -183,10 +186,10 @@ def create_run(db: Session, run: schemas.RunCreate, experiment_no: int):
         models.Project.project_id == project_id).first()
     projname = projname.project_name
 
-
     os.mkdir(f'projects/{projname}/{expname}/runs/{runname}')
 
     return db_run
+
 
 def update_run_config(db: Session, run_no: int):
 
@@ -195,21 +198,21 @@ def update_run_config(db: Session, run_no: int):
     config.config_value = True
 
     db.commit()
-     
+
     return 'configured'
 
 
 def create_run_config_file(db: Session, model: schemas.CreateRunConfigFile):
     no_of_epoch = model.no_of_epoch
     batch_size = model.batch_size
-    field_1 = model.field_1
-    field_2 = model.field_2
+    ip = model.ip
+    port = model.port
 
     DATA = {}
     DATA["number of epoch"] = no_of_epoch
     DATA["Batch Size"] = batch_size
-    DATA["Field 1"] = field_1
-    DATA["Field 2"] = field_2
+    DATA["ipaddress"] = ip
+    DATA["port"] = port
     return DATA
 
 

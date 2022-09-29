@@ -31,6 +31,8 @@ app.add_middleware(
 )
 
 # Dependency
+
+
 def get_db():
     db = SessionLocal()
     try:
@@ -214,8 +216,6 @@ def get_token(expno: int, db: Session = Depends(get_db)):
 
     config_path = crud.update_configuration(expno=expno, db=db)
 
-    
-
     return crud.update_token(expno=expno, db=db)
 
 
@@ -255,9 +255,8 @@ def read_runs(db: Session = Depends(get_db)):
     return run
 
 
-
 @app.post("/projects/experiments/{experiment_no}/runs", status_code=status.HTTP_201_CREATED, response_model=schemas.Run)
-def create_run_under_experiment(experiment_no: int, run : schemas.RunCreate, db: Session = Depends(get_db)):
+def create_run_under_experiment(experiment_no: int, run: schemas.RunCreate, db: Session = Depends(get_db)):
     return crud.create_run(db=db, experiment_no=experiment_no, run=run)
 
 
@@ -271,12 +270,10 @@ def check_run_config_value(run_no: int, db: Session = Depends(get_db)):
     return run_config_value
 
 
-
 @app.put("/runs/config/step2/", status_code=status.HTTP_200_OK)
-def update_run_config_value(run_no:int, db: Session = Depends(get_db)):
+def update_run_config_value(run_no: int, db: Session = Depends(get_db)):
 
     return crud.update_run_config(run_no=run_no, db=db)
-
 
 
 @app.put("/runs/config/step1/", status_code=status.HTTP_202_ACCEPTED)
@@ -310,29 +307,9 @@ def create_config_file(run_no: int, model: schemas.CreateRunConfigFile, db: Sess
     return "saved"
 
 
-
-
-
-
-
-
-from zipfile import ZipFile
-files = ['file1.txt', 'file2.txt', 'file3.txt']
-zip_file = 'EmployeeReport.zip'
-with ZipFile(zip_file, 'a') as zip:
-   for file in files:
-       zip.write(file)
-print("Files Added")
-
-
-
-
-#h5
-#config.json
-#zip and save under experiment  
-
-
+# h5
+# config.json
+# zip and save under experiment
 # uuid + 127.0.0.1+ 8000
-
 if __name__ == "__main__":
     uvicorn.run(app, host="localhost", port=8000)
