@@ -39,8 +39,7 @@ class Experiment(Base):
 
     experiment_config = Column(Boolean, default=False)
 
-    uuid = Column(UUID(as_uuid=True), default=uuid.uuid4,
-                  nullable=False, unique=True)
+    
     token = Column(String)
 
 

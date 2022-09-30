@@ -1,15 +1,17 @@
 from distutils.command.config import config
 from sqlite3 import Timestamp
+import string
 from tokenize import String
 from typing import List, Union
 from xmlrpc.client import Boolean
 
 from pydantic import BaseModel
 
+
 class RunConfigBase(BaseModel):
     batch_size: int
-    ip :str
-    port:str
+    ip: str
+    port: str
     no_of_epoch: int
 
 
@@ -17,22 +19,19 @@ class CreateRunConfigFile(RunConfigBase):
     pass
 
 
-class RunCreate(RunConfigBase):
-    pass
-
 
 class RunBase(BaseModel):
     pass
 
 
-class RunCreate(BaseModel):
+class RunCreate(RunBase):
     pass
 
 
 class Run(RunBase):
     run_no: int
     experiment_no: int
-    run_name:str
+    run_name: str
 
     class Config:
         orm_mode = True
@@ -49,8 +48,8 @@ class ExperimentCreate(ExperimentBase):
 class Experiment(ExperimentBase):
     experiment_no: int
     project_id: int
-    experiment_config :Boolean
-    token : str
+    experiment_config: Boolean
+    token: str
     runs: List[Run] = []
 
     class Config:
@@ -81,5 +80,3 @@ class ConfigBase(BaseModel):
 
 class CreateConfigFile(ConfigBase):
     pass
-
-

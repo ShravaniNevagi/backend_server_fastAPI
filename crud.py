@@ -9,6 +9,7 @@ import os
 from fastapi import File, UploadFile
 import shutil
 
+import zipfile
 
 def get_projects(db: Session):
     return db.query(models.Project).all()
@@ -40,9 +41,17 @@ def get_exp_by_name(db: Session, name: str, id: int):
 
 
 def create_project_experiment(db: Session, experiment: schemas.ExperimentCreate, project_id: int):
-
+    import uuid
+  
+    id = uuid.uuid4()
+    ip = '127.0.0.1'
+    port = '8000'
+    delim = "+"
+    token = str(id) + delim + ip + delim + port
+    
     db_exp = models.Experiment(**experiment.dict(), project_id=project_id)
     db.add(db_exp)
+    db_exp.token = token
     db.commit()
     db.refresh(db_exp)
     expname = db_exp.experiment_name
@@ -67,21 +76,7 @@ def update_config_path(db: Session, expno: int, dir: str):
 
     return item_to_update
 
-def update_token(db: Session, expno: int):
-    exp_uuid = db.query(models.Experiment).filter(
-        models.Experiment.experiment_no == expno).first()
-    exp_uuid = exp_uuid.uuid
-    ip = '127.0.0.1'
-    port = '8000'
-    delim = "+"
-    token = str(exp_uuid) + delim + ip + delim +  port
-    exptoken = db.query(models.Experiment).filter(
-        models.Experiment.experiment_no == expno).first()
-    exptoken.token = token
 
-    db.commit()
-    return token
-    
 
 def update_configuration(db: Session, expno: int):
 
@@ -140,6 +135,9 @@ def save_file(db: Session, experiment_no: int, uploaded_file: File(...)):
         file_object.write(uploaded_file.file.read())
 
     return "file uploaded"
+    if uploaded_file.endswith('.h5'):
+        # zip
+        return "file uploaded"
 
 
 def create_config_file(db: Session, model: schemas.CreateConfigFile, project_name: str, experiment_name: str):
@@ -163,17 +161,19 @@ def get_runs(db: Session):
 def create_run(db: Session, run: schemas.RunCreate, experiment_no: int):
 
     db_run = models.Run(**run.dict(), experiment_no=experiment_no)
-    num = db.query(models.Run).filter(models.Run.experiment_no ==experiment_no ).count()
+    num = db.query(models.Run).filter(
+        models.Run.experiment_no == experiment_no).count()
 
     db_run.run_name = f'run{num+1}'
     db.add(db_run)
     db.commit()
     db.refresh(db_run)
-    
+
     runname = db_run.run_name
 
-    exp = db.query(models.Experiment).filter(models.Experiment.experiment_no == experiment_no).first()
-    
+    exp = db.query(models.Experiment).filter(
+        models.Experiment.experiment_no == experiment_no).first()
+
     expname = exp.experiment_name
     project_id = exp.project_id
 
@@ -181,10 +181,10 @@ def create_run(db: Session, run: schemas.RunCreate, experiment_no: int):
         models.Project.project_id == project_id).first()
     projname = projname.project_name
 
-
     os.mkdir(f'projects/{projname}/{expname}/runs/{runname}')
 
     return db_run
+
 
 def update_run_config(db: Session, run_no: int):
 
@@ -193,7 +193,7 @@ def update_run_config(db: Session, run_no: int):
     config.config_value = True
 
     db.commit()
-     
+
     return 'configured'
 
 
@@ -221,3 +221,23 @@ def update_run_config_path(db: Session, run_no: int, dir: str):
     db.commit()
 
     return item_to_update
+
+
+
+def zipfiles(db: Session, experiment_no: int):
+
+    obj = db.query(models.Experiment).filter(
+        models.Experiment.experiment_no == experiment_no).first()
+
+    experimentname = obj.experiment_name
+
+    project_name = db.query(models.Project).filter(
+        models.Project.project_id == obj.project_id).first()
+    projectname = project_name.project_name
+    
+    with zipfile.ZipFile(f'projects/{projectname}/{experimentname}/{experimentname}.zip', 'w',
+                        compression=zipfile.ZIP_DEFLATED, #compression method - Usual ZIP compression
+                        compresslevel=9) as zf:
+        zf.write(f'projects/{projectname}/{experimentname}/file.json', arcname='file.json')
+        #zf.write(f'projects/{projectname}/{experimentname}/file.h5', arcname='file.h5')
+    return 'success'

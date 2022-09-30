@@ -31,6 +31,8 @@ app.add_middleware(
 )
 
 # Dependency
+
+
 def get_db():
     db = SessionLocal()
     try:
@@ -213,10 +215,8 @@ async def create_upload_files(experiment_no: int, files: List[UploadFile] = File
 def get_token(expno: int, db: Session = Depends(get_db)):
 
     config_path = crud.update_configuration(expno=expno, db=db)
-
-    
-
-    return crud.update_token(expno=expno, db=db)
+    token = db.query(models.Experiment).filter(models.Experiment.experiment_no == expno).first()
+    return token.token
 
 
 @app.delete("/experiments/delete_experiment/", status_code=status.HTTP_200_OK)
@@ -255,9 +255,8 @@ def read_runs(db: Session = Depends(get_db)):
     return run
 
 
-
 @app.post("/projects/experiments/{experiment_no}/runs", status_code=status.HTTP_201_CREATED, response_model=schemas.Run)
-def create_run_under_experiment(experiment_no: int, run : schemas.RunCreate, db: Session = Depends(get_db)):
+def create_run_under_experiment(experiment_no: int, run: schemas.RunCreate, db: Session = Depends(get_db)):
     return crud.create_run(db=db, experiment_no=experiment_no, run=run)
 
 
@@ -271,12 +270,10 @@ def check_run_config_value(run_no: int, db: Session = Depends(get_db)):
     return run_config_value
 
 
-
 @app.put("/runs/config/step2/", status_code=status.HTTP_200_OK)
-def update_run_config_value(run_no:int, db: Session = Depends(get_db)):
+def update_run_config_value(run_no: int, db: Session = Depends(get_db)):
 
     return crud.update_run_config(run_no=run_no, db=db)
-
 
 
 @app.put("/runs/config/step1/", status_code=status.HTTP_202_ACCEPTED)
@@ -311,28 +308,12 @@ def create_config_file(run_no: int, model: schemas.CreateRunConfigFile, db: Sess
 
 
 
+@app.get("/zip_files/", status_code=status.HTTP_200_OK)
+def zip_files(experiment_no: int, db: Session = Depends(get_db)):
 
-from zipfile import ZipFile
-import os
-
-print(f"Before zipping: {os.listdir()}")
-file = "new.zip"  # zip file name
-with ZipFile(file, 'w') as zip:
-   zip.write("Screenshot (1).png")  # zipping the file
-
-
-print("File successfully zipped")
-print(f"After zipping: {os.listdir()}")
-with ZipFile(file, 'r') as zip:
-   zip.printdir()
-
-
-#h5
-#config.json
-#zip and save under experiment  
+    return crud.zipfiles(db=db,experiment_no=experiment_no)
 
 
 # uuid + 127.0.0.1+ 8000
-
 if __name__ == "__main__":
     uvicorn.run(app, host="localhost", port=8000)
