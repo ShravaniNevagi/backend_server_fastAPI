@@ -139,8 +139,6 @@ def save_file(db: Session, experiment_no: int, uploaded_file: File(...)):
     with open(file_location, "wb+") as file_object:
         file_object.write(uploaded_file.file.read())
 
-    if  uploaded_file.endswith('.h5')::
-        #zip
     return "file uploaded"
 
 
@@ -202,14 +200,15 @@ def update_run_config(db: Session, run_no: int):
 def create_run_config_file(db: Session, model: schemas.CreateRunConfigFile):
     no_of_epoch = model.no_of_epoch
     batch_size = model.batch_size
-    field_1 = model.field_1
-    field_2 = model.field_2
+    ip = model.ip
+    port = model.port
+
 
     DATA = {}
     DATA["number of epoch"] = no_of_epoch
     DATA["Batch Size"] = batch_size
-    DATA["Field 1"] = field_1
-    DATA["Field 2"] = field_2
+    DATA["ipaddress"] = ip
+    DATA["port"] = port
     return DATA
 
 

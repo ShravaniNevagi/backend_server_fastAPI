@@ -312,19 +312,19 @@ def create_config_file(run_no: int, model: schemas.CreateRunConfigFile, db: Sess
 
 
 
-
-
-
-
 from zipfile import ZipFile
-files = ['file1.txt', 'file2.txt', 'file3.txt']
-zip_file = 'EmployeeReport.zip'
-with ZipFile(zip_file, 'a') as zip:
-   for file in files:
-       zip.write(file)
-print("Files Added")
+import os
+
+print(f"Before zipping: {os.listdir()}")
+file = "new.zip"  # zip file name
+with ZipFile(file, 'w') as zip:
+   zip.write("Screenshot (1).png")  # zipping the file
 
 
+print("File successfully zipped")
+print(f"After zipping: {os.listdir()}")
+with ZipFile(file, 'r') as zip:
+   zip.printdir()
 
 
 #h5

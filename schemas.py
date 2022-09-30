@@ -1,5 +1,6 @@
 from distutils.command.config import config
 from sqlite3 import Timestamp
+from tokenize import String
 from typing import List, Union
 from xmlrpc.client import Boolean
 
@@ -7,8 +8,8 @@ from pydantic import BaseModel
 
 class RunConfigBase(BaseModel):
     batch_size: int
-    field_1 :str
-    field_2:str
+    ip :str
+    port:str
     no_of_epoch: int
 
 
@@ -49,6 +50,7 @@ class Experiment(ExperimentBase):
     experiment_no: int
     project_id: int
     experiment_config :Boolean
+    token : str
     runs: List[Run] = []
 
     class Config:
