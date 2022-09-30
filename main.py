@@ -213,7 +213,7 @@ async def create_upload_files(experiment_no: int, files: List[UploadFile] = File
 
 @app.put("/experiments/config/generate_token/", status_code=status.HTTP_200_OK)
 def get_token(expno: int, db: Session = Depends(get_db)):
-
+    crud.zipfiles(db=db,experiment_no=expno)
     config_path = crud.update_configuration(expno=expno, db=db)
     token = db.query(models.Experiment).filter(models.Experiment.experiment_no == expno).first()
     return token.token
@@ -308,10 +308,10 @@ def create_config_file(run_no: int, model: schemas.CreateRunConfigFile, db: Sess
 
 
 
-@app.get("/zip_files/", status_code=status.HTTP_200_OK)
-def zip_files(experiment_no: int, db: Session = Depends(get_db)):
+# @app.get("/zip_files/", status_code=status.HTTP_200_OK)
+# def zip_files(experiment_no: int, db: Session = Depends(get_db)):
 
-    return crud.zipfiles(db=db,experiment_no=experiment_no)
+#     return crud.zipfiles(db=db,experiment_no=experiment_no)
 
 
 # uuid + 127.0.0.1+ 8000
