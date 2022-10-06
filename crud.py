@@ -1,4 +1,5 @@
 from ast import And
+from lib2to3.pgen2 import token
 
 from sqlalchemy.orm import Session
 
@@ -8,6 +9,7 @@ from models import Experiment
 import os
 from fastapi import File, UploadFile
 import shutil
+from fastapi import HTTPException, status
 
 import zipfile
 
@@ -82,6 +84,10 @@ def update_configuration(db: Session, expno: int):
 
     config = db.query(models.Experiment).filter(
         models.Experiment.experiment_no == expno).first()
+
+    if config is None:
+        raise HTTPException(status_code=404, detail="experiment not found")
+   
     config.experiment_config = True
 
     db.commit()
@@ -190,6 +196,10 @@ def update_run_config(db: Session, run_no: int):
 
     config = db.query(models.Run).filter(
         models.Run.run_no == run_no).first()
+    
+
+    if config is None:
+        raise HTTPException(status_code=404, detail="run not found")
     config.config_value = True
 
     db.commit()
@@ -228,6 +238,8 @@ def zipfiles(db: Session, experiment_no: int):
 
     obj = db.query(models.Experiment).filter(
         models.Experiment.experiment_no == experiment_no).first()
+    if obj is None:
+        raise HTTPException(status_code=404, detail="experiment not found")
 
     experimentname = obj.experiment_name
 
@@ -235,9 +247,48 @@ def zipfiles(db: Session, experiment_no: int):
         models.Project.project_id == obj.project_id).first()
     projectname = project_name.project_name
     
-    with zipfile.ZipFile(f'projects/{projectname}/{experimentname}/{experimentname}.zip', 'w',
+    with zipfile.ZipFile(f'projects/{projectname}/{experimentname}/archives.zip', 'w',
                         compression=zipfile.ZIP_DEFLATED, #compression method - Usual ZIP compression
                         compresslevel=9) as zf:
-        zf.write(f'projects/{projectname}/{experimentname}/file.json', arcname='file.json')
+        path = f'projects/{projectname}/{experimentname}/'
+        root = 'projects/'
+        for root, dirs, files in os.walk(path):
+                for file in files:
+                    if file == 'file.json' or file == 'file.h5':
+                        
+                        zf.write(os.path.join(root, file))
+        
+        
+        
+        #zf.write(f'projects/{projectname}/{experimentname}/file.json', arcname='file.json')
         #zf.write(f'projects/{projectname}/{experimentname}/file.h5', arcname='file.h5')
+
+   
     return 'success'
+
+
+
+def get_tokens(token:str, db:Session):
+    return db.query(models.Experiment).filter(models.Experiment.token == token).first()
+
+
+def add_client(port:str,ipaddress:str,token:str,client_name:str,db: Session):
+
+    # models.Client.client_name = client_name
+    # models.Client.token = token
+    # models.Client.port = port
+    # models.Client.ipaddress = ipaddress
+    
+    db_client = models.Client(client_name = client_name,token = token,port = port,ipaddress = ipaddress)
+    db.add(db_client)
+    db.commit()
+
+    return 
+
+
+def check_token(token:str, db:Session):
+    return db.query(models.Client).filter(models.Client.token == token).first()
+
+
+def get_exp_by_token(db: Session, token:str):
+    return db.query(models.Experiment).filter(models.Experiment.token == token).first()

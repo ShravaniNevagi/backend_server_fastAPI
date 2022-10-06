@@ -40,7 +40,7 @@ class Experiment(Base):
     experiment_config = Column(Boolean, default=False)
 
     
-    token = Column(String)
+    token = Column(String,  unique=True)
 
 
     project_id = Column(Integer, ForeignKey(
@@ -74,11 +74,11 @@ class Client(Base):
     __tablename__ = "clients"
     client_no = Column(Integer, primary_key=True, index=True)
     client_name = Column(String, nullable=False, index=True)
-    experiment_no = Column(Integer, ForeignKey(
-        "experiments.experiment_no", ondelete="CASCADE"))
+    token = Column(String, ForeignKey(
+        "experiments.token", ondelete="CASCADE"))
 
     
     ipaddress = Column(String, nullable=False, index=True)
-    port = Column(Integer, nullable=False, index=True)
+    port = Column(String, nullable=False, index=True)
 
     experimentclient = relationship("Experiment", back_populates="clients")

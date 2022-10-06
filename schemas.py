@@ -8,6 +8,19 @@ from xmlrpc.client import Boolean
 from pydantic import BaseModel
 
 
+
+class Client(BaseModel):
+    client_no:int
+    client_name:str
+    token:str
+    
+    ipaddress:str
+    port:str
+
+
+    class Config:
+        orm_mode = True
+
 class RunConfigBase(BaseModel):
     batch_size: int
     ip: str
@@ -51,6 +64,7 @@ class Experiment(ExperimentBase):
     experiment_config: Boolean
     token: str
     runs: List[Run] = []
+    clients: List[Client] = []
 
     class Config:
         orm_mode = True

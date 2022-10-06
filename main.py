@@ -13,8 +13,12 @@ import os
 import json
 
 from fastapi import File, UploadFile
+from fastapi.responses import FileResponse
+
 
 models.Base.metadata.create_all(bind=engine)
+
+
 
 app = FastAPI()
 
@@ -244,6 +248,8 @@ def check_config_value(experiment_no: int, db: Session = Depends(get_db)):
 
     exp_config_value = db.query(models.Experiment).filter(
         models.Experiment.experiment_no == experiment_no).first()
+    if exp_config_value is None:
+        raise HTTPException(status_code=404, detail="experiment not found")
 
     exp_config_value = exp_config_value.experiment_config
     return exp_config_value
@@ -266,6 +272,9 @@ def check_run_config_value(run_no: int, db: Session = Depends(get_db)):
     run_config_value = db.query(models.Run).filter(
         models.Run.run_no == run_no).first()
 
+    if run_config_value is None:
+        raise HTTPException(status_code=404, detail="run not found")
+
     run_config_value = run_config_value.config_value
     return run_config_value
 
@@ -280,6 +289,10 @@ def update_run_config_value(run_no: int, db: Session = Depends(get_db)):
 def create_config_file(run_no: int, model: schemas.CreateRunConfigFile, db: Session = Depends(get_db)):
     run = db.query(models.Run).filter(
         models.Run.run_no == run_no).first()
+
+    if run is None:
+        raise HTTPException(status_code=404, detail="run not found")
+
     run_name = run.run_name
 
     experiment = db.query(models.Experiment).filter(
@@ -291,7 +304,7 @@ def create_config_file(run_no: int, model: schemas.CreateRunConfigFile, db: Sess
     project_name = project_name.project_name
 
     dir = f'projects/{project_name}/{experiment_name}/runs/{run_name}'
-    FILE = dir + '/file.json'
+    FILE = dir + '/runsconfigfile.json'
 
     DATA = crud.create_run_config_file(
         db=db, model=model)
@@ -306,14 +319,44 @@ def create_config_file(run_no: int, model: schemas.CreateRunConfigFile, db: Sess
         run_no=run_no, db=db, dir=FILE)
     return "saved"
 
+from fastapi import Request
+@app.post("/client_registration", status_code=status.HTTP_200_OK)
+async def add_new_client(request:Request,db: Session = Depends(get_db), ):
+    
+    
+    form = await request.form()
+    token = form["token"]
+    port = form["port"]
+    ipaddress = form["ipaddress"]
+    client_name = form["client_name"]
+
+    client_token = crud.get_tokens(db= db, token=token)
+    if client_token is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="token not found")
+    
+    existing_token = crud.check_token(db= db, token=token)
+
+    if existing_token:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="token already registered")
+    
+    crud.add_client(db=db, client_name = client_name,token =token, port = port,ipaddress=ipaddress)
+    
 
 
-# @app.get("/zip_files/", status_code=status.HTTP_200_OK)
-# def zip_files(experiment_no: int, db: Session = Depends(get_db)):
 
-#     return crud.zipfiles(db=db,experiment_no=experiment_no)
+    exp =  crud.get_exp_by_token(db = db, token = token)
+    path = exp.experiment_config_path
+    file_path = f"{path}/archives.zip"
+    return FileResponse(file_path)
+    
 
 
-# uuid + 127.0.0.1+ 8000
+
+
+
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="localhost", port=8000)
