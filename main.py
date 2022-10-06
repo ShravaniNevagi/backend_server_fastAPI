@@ -335,11 +335,11 @@ async def add_new_client(request:Request,db: Session = Depends(get_db), ):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="token not found")
     
-    existing_token = crud.check_token(db= db, token=token)
+    # existing_token = crud.check_token(db= db, token=token)
 
-    if existing_token:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="token already registered")
+    # if existing_token:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_409_CONFLICT, detail="token already registered")
     
     crud.add_client(db=db, client_name = client_name,token =token, port = port,ipaddress=ipaddress)
     
@@ -353,7 +353,17 @@ async def add_new_client(request:Request,db: Session = Depends(get_db), ):
     
 
 
+@app.get("/get_clients/")
+def get_clients_by_token(token: str, db: Session = Depends(get_db)):
 
+    clients = db.query(models.Client).filter(
+        models.Client.token == token).all()
+
+    if clients is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="no clients")
+
+    
+    return clients
 
 
 

@@ -141,9 +141,7 @@ def save_file(db: Session, experiment_no: int, uploaded_file: File(...)):
         file_object.write(uploaded_file.file.read())
 
     return "file uploaded"
-    if uploaded_file.endswith('.h5'):
-        # zip
-        return "file uploaded"
+
 
 
 def create_config_file(db: Session, model: schemas.CreateConfigFile, project_name: str, experiment_name: str):
@@ -254,7 +252,7 @@ def zipfiles(db: Session, experiment_no: int):
         root = 'projects/'
         for root, dirs, files in os.walk(path):
                 for file in files:
-                    if file == 'file.json' or file == 'file.h5':
+                    if file == 'file.json' or file == 'model.h5' or file == 'loader.py':
                         
                         zf.write(os.path.join(root, file))
         

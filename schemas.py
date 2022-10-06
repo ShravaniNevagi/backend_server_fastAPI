@@ -1,4 +1,3 @@
-from distutils.command.config import config
 from sqlite3 import Timestamp
 import string
 from tokenize import String
