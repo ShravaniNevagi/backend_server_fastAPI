@@ -128,17 +128,17 @@ def save_file(db: Session, experiment_no: int, uploaded_file: File(...)):
     project_name = db.query(models.Project).filter(
         models.Project.project_id == experiment.project_id).first()
     project_name = project_name.project_name
-
-    file_extension = pathlib.Path(f'{uploaded_file}').suffix
-    print(file_extension)
+    
     file_location = f"projects/{project_name}/{experiment_name}/{uploaded_file.filename}"
+    file_extension = pathlib.Path(f'{file_location}').suffix
+        
     with open(file_location, "wb+") as file_object:
         file_object.write(uploaded_file.file.read())
 
     if file_extension == '.h5':
-        os.rename(r'projects/string/string/b.py',r'projects/string/string/model.h5')
+        os.rename(rf'{file_location}',rf'projects/{project_name}/{experiment_name}/model.h5')
     if file_extension == '.py':
-        os.rename(rf'{file_location}',rf'projects/{project_name}/{experiment_name}/loader.h5')
+        os.rename(rf'{file_location}',rf'projects/{project_name}/{experiment_name}/loader.py')
     if file_extension == '.npz':
         os.rename(rf'{file_location}',rf'projects/{project_name}/{experiment_name}/testdata.npz')
 
