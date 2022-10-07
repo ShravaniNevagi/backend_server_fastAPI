@@ -115,7 +115,7 @@ def create_config_file(expno: int, model: schemas.CreateConfigFile, db: Session 
     project_name = project_name.project_name
 
     dir = f'projects/{project_name}/{experiment_name}'
-    FILE = dir + '/file.json'
+    FILE = dir + '/config.json'
 
     DATA = crud.create_config_file(
         db=db, model=model, experiment_name=experiment_name, project_name=project_name)

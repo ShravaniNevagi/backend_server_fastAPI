@@ -1,16 +1,13 @@
-from ast import And
-from lib2to3.pgen2 import token
 
 from sqlalchemy.orm import Session
 
 import models
 import schemas
-from models import Experiment
+
 import os
 from fastapi import File, UploadFile
 import shutil
-from fastapi import HTTPException, status
-
+import pathlib
 import zipfile
 
 def get_projects(db: Session):
@@ -84,10 +81,6 @@ def update_configuration(db: Session, expno: int):
 
     config = db.query(models.Experiment).filter(
         models.Experiment.experiment_no == expno).first()
-
-    if config is None:
-        raise HTTPException(status_code=404, detail="experiment not found")
-   
     config.experiment_config = True
 
     db.commit()
@@ -136,12 +129,21 @@ def save_file(db: Session, experiment_no: int, uploaded_file: File(...)):
         models.Project.project_id == experiment.project_id).first()
     project_name = project_name.project_name
 
+    file_extension = pathlib.Path(f'{uploaded_file}').suffix
+    print(file_extension)
     file_location = f"projects/{project_name}/{experiment_name}/{uploaded_file.filename}"
     with open(file_location, "wb+") as file_object:
         file_object.write(uploaded_file.file.read())
 
-    return "file uploaded"
+    if file_extension == '.h5':
+        os.rename(r'projects/string/string/b.py',r'projects/string/string/model.h5')
+    if file_extension == '.py':
+        os.rename(rf'{file_location}',rf'projects/{project_name}/{experiment_name}/loader.h5')
+    if file_extension == '.npz':
+        os.rename(rf'{file_location}',rf'projects/{project_name}/{experiment_name}/testdata.npz')
 
+    return "file uploaded"
+    
 
 
 def create_config_file(db: Session, model: schemas.CreateConfigFile, project_name: str, experiment_name: str):
@@ -194,10 +196,6 @@ def update_run_config(db: Session, run_no: int):
 
     config = db.query(models.Run).filter(
         models.Run.run_no == run_no).first()
-    
-
-    if config is None:
-        raise HTTPException(status_code=404, detail="run not found")
     config.config_value = True
 
     db.commit()
@@ -236,8 +234,6 @@ def zipfiles(db: Session, experiment_no: int):
 
     obj = db.query(models.Experiment).filter(
         models.Experiment.experiment_no == experiment_no).first()
-    if obj is None:
-        raise HTTPException(status_code=404, detail="experiment not found")
 
     experimentname = obj.experiment_name
 
@@ -252,7 +248,7 @@ def zipfiles(db: Session, experiment_no: int):
         root = 'projects/'
         for root, dirs, files in os.walk(path):
                 for file in files:
-                    if file == 'file.json' or file == 'model.h5' or file == 'loader.py':
+                    if file.endswith('.json') or file.endswith('.h5') or file.endswith('.py'):
                         
                         zf.write(os.path.join(root, file))
         

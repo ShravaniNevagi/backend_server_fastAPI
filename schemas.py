@@ -44,6 +44,7 @@ class Run(RunBase):
     run_no: int
     experiment_no: int
     run_name: str
+    run_config_path:Boolean
 
     class Config:
         orm_mode = True
