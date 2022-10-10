@@ -163,6 +163,9 @@ def create_config_file(db: Session, model: schemas.CreateConfigFile, project_nam
 def get_runs(db: Session):
     return db.query(models.Run).all()
 
+def get_runs_by_expno(db: Session, experiment_no:int):
+    return db.query(models.Run).filter(
+        models.Run.experiment_no == experiment_no).all()
 
 def create_run(db: Session, run: schemas.RunCreate, experiment_no: int):
 

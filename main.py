@@ -260,6 +260,10 @@ def read_runs(db: Session = Depends(get_db)):
     run = crud.get_runs(db)
     return run
 
+@app.get("/runs/{experiment_no}", response_model=List[schemas.Run])
+def get_runs_by_expid(id: int, db: Session = Depends(get_db)):
+    run = crud.get_runs_by_expno(db, experiment_no=id)
+    return run
 
 @app.post("/projects/experiments/{experiment_no}/runs", status_code=status.HTTP_201_CREATED, response_model=schemas.Run)
 def create_run_under_experiment(experiment_no: int, run: schemas.RunCreate, db: Session = Depends(get_db)):
