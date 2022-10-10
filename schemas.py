@@ -45,6 +45,7 @@ class Run(RunBase):
     experiment_no: int
     run_name: str
     config_value:Boolean
+    accuracy: str
 
     class Config:
         orm_mode = True

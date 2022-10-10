@@ -41,23 +41,37 @@ def get_exp_by_name(db: Session, name: str, id: int):
 
 def create_project_experiment(db: Session, experiment: schemas.ExperimentCreate, project_id: int):
     import uuid
-  
+    
+    projname = db.query(models.Project).filter(
+        models.Project.project_id == project_id).first()
+    projname = projname.project_name
+    
+    
+    #uuid.uuid3(uuid.NAMESPACE_URL, {projectname} + {experimentname}))
     id = uuid.uuid4()
     ip = '127.0.0.1'
     port = '8000'
     delim = "+"
-    token = str(id) + delim + ip + delim + port
+    
     
     db_exp = models.Experiment(**experiment.dict(), project_id=project_id)
     db.add(db_exp)
-    db_exp.token = token
+    # db_exp.token = token
     db.commit()
     db.refresh(db_exp)
     expname = db_exp.experiment_name
+    expid = db_exp.experiment_no
 
-    projname = db.query(models.Project).filter(
-        models.Project.project_id == project_id).first()
-    projname = projname.project_name
+    name = str(projname) + delim + str(expname)
+
+    token = str(uuid.uuid3(uuid.NAMESPACE_URL, name)) + delim + str(id) + delim + ip + delim + port
+
+    db_token = db.query(models.Experiment).filter(
+        models.Experiment.experiment_no == expid).first()
+    db_token.token = token
+
+    db.commit()
+    db.refresh(db_token)
     os.mkdir(f'projects/{projname}/{expname}')
 
     os.mkdir(f'projects/{projname}/{expname}/runs')

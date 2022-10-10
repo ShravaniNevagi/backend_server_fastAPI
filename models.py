@@ -37,7 +37,6 @@ class Experiment(Base):
 
     experiment_config = Column(Boolean, default=False)
 
-    
     token = Column(String,  unique=True)
 
 
@@ -59,10 +58,10 @@ class Run(Base):
     run_name = Column(String, nullable=False, index=True)
     experiment_no = Column(Integer, ForeignKey(
         "experiments.experiment_no", ondelete="CASCADE"))
-
+    
     config_value = Column(Boolean, default=False)
     run_config_path = Column(String)
-
+    accuracy = Column(String, default='-')
     experimentrun = relationship("Experiment", back_populates="runs")
 
     
