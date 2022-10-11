@@ -371,7 +371,13 @@ def get_clients_by_token(token: str, db: Session = Depends(get_db)):
     return clients
 
 
+@app.post("/start_run/")
+def start_run(token: str, model :schemas.RunClients, db: Session = Depends(get_db)):
+
+    print(model.token)
+    
+    return 200
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="localhost", port=8000)
+    uvicorn.run(app, host="localhost",port=8000)

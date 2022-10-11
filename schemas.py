@@ -6,6 +6,12 @@ from xmlrpc.client import Boolean
 
 from pydantic import BaseModel
 
+class RunClients(BaseModel):
+    
+    client_names:List
+    token:str
+
+
 
 
 class Client(BaseModel):
