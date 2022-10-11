@@ -25,6 +25,7 @@ class RunConfigBase(BaseModel):
     ip: str
     port: str
     no_of_epoch: int
+    no_of_rounds: int
 
 
 class CreateRunConfigFile(RunConfigBase):

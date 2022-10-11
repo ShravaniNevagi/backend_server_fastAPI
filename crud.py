@@ -220,18 +220,24 @@ def update_run_config(db: Session, run_no: int):
     return 'configured'
 
 
-def create_run_config_file(db: Session, model: schemas.CreateRunConfigFile):
+def create_run_config_file(db: Session, model: schemas.CreateRunConfigFile,runname:str,expname:str,rundir:str,expdir:str):
     no_of_epoch = model.no_of_epoch
     batch_size = model.batch_size
     ip = model.ip
     port = model.port
+    no_of_rounds = model.no_of_rounds
 
 
     DATA = {}
-    DATA["number of epoch"] = no_of_epoch
-    DATA["Batch Size"] = batch_size
+    DATA["number_of_epochs"] = no_of_epoch
+    DATA["batch_size"] = batch_size
     DATA["ipaddress"] = ip
     DATA["port"] = port
+    DATA["experiment_name"] = expname
+    DATA["run_name"] = runname
+    DATA["run_path"] = rundir
+    DATA["experiment_path"] = expdir
+    DATA["number_of_rounds"] = no_of_rounds
     return DATA
 
 

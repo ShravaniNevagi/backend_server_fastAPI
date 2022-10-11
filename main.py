@@ -307,11 +307,12 @@ def create_config_file(run_no: int, model: schemas.CreateRunConfigFile, db: Sess
         models.Project.project_id == experiment.project_id).first()
     project_name = project_name.project_name
 
+    expdir = f'projects/{project_name}/{experiment_name}'
     dir = f'projects/{project_name}/{experiment_name}/runs/{run_name}'
     FILE = dir + '/runs_config.json'
 
     DATA = crud.create_run_config_file(
-        db=db, model=model)
+        db=db, model=model,expname=experiment_name ,runname=run_name, rundir = dir, expdir = expdir)
 
     DATA = json.dumps(DATA)
     _ = open(FILE, mode='w+').write(DATA)
