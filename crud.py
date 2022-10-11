@@ -154,7 +154,7 @@ def save_file(db: Session, experiment_no: int, uploaded_file: File(...)):
     if file_extension == '.py':
         os.rename(rf'{file_location}',rf'projects/{project_name}/{experiment_name}/loader.py')
     if file_extension == '.npz':
-        os.rename(rf'{file_location}',rf'projects/{project_name}/{experiment_name}/testdata.npz')
+        os.rename(rf'{file_location}',rf'projects/{project_name}/{experiment_name}/test_data.npz')
 
     return "file uploaded"
     
