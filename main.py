@@ -15,6 +15,9 @@ import json
 from fastapi import File, UploadFile
 from fastapi.responses import FileResponse
 
+import docker
+
+
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -372,12 +375,14 @@ def get_clients_by_token(token: str, db: Session = Depends(get_db)):
 
 
 @app.post("/start_run/")
-def start_run(token: str, model :schemas.RunClients, db: Session = Depends(get_db)):
+def start_run( model :schemas.RunClients, db: Session = Depends(get_db)):
 
-    print(model.token)
+    crud.start_run(db=db, model=model)
+   
+    # print(model.token)
     
     return 200
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="localhost",port=8000)
+    uvicorn.run('main:app', host="localhost",port=8000, reload=True)

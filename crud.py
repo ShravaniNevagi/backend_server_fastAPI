@@ -9,6 +9,9 @@ from fastapi import File, UploadFile
 import shutil
 import pathlib
 import zipfile
+import docker
+import json
+import requests
 
 def get_projects(db: Session):
     return db.query(models.Project).all()
@@ -309,3 +312,43 @@ def check_token(token:str, db:Session):
 
 def get_exp_by_token(db: Session, token:str):
     return db.query(models.Experiment).filter(models.Experiment.token == token).first()
+
+
+
+def start_run(db: Session,model:schemas.RunClients):
+
+    
+
+    token = model.token
+    path = db.query(models.Experiment).filter(models.Experiment.token == token).first()
+    path = path.experiment_config_path
+
+    run_path = path + '/runs/'+ model.run_name
+
+    with open(run_path+'/runs_config.json') as f:
+        runs_config = json.load(f)
+
+    runs_config['number_of_clients']=len(model.client_ip)
+    experiment_path=os.getcwd() + '/'+runs_config['experiment_path']
+
+    with open(run_path+'/runs_config.json', 'w') as f:
+        json.dump(runs_config,f)
+
+    # client = docker.from_env()
+    # container = client.containers.run(image = 'flower_tensorflow_server',network='host', environment = ['RUN_PATH=runs/'+model.run_name+'/'],volumes = {experiment_path:{'bind':'/app/dir/','mode': 'rw'}},detach=True,remove=True)
+    # while(True):
+    #     if 'FL starting' in str(container.logs()):
+    #         print('FL starting')
+    #         break
+    endpoint_url = 'start_client/'
+    payload = {'token':token, 'run_name' : model.run_name, 'runs_config':runs_config}
+    for i in range(len(model.client_ip)):
+            url = f'http://{model.client_ip[i]}:{model.client_port[i]}/{endpoint_url}'
+            r = requests.post(url, json = payload)
+
+    
+        
+
+    # docker run -it --network host -e RUN_PATH='runs/run1/' -v /home/sashreek/temp/experiment_agg:/app/dir/ server bash
+
+    return 

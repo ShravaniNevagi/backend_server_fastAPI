@@ -1,1 +1,1 @@
-{"number_of_epochs": 0, "batch_size": 0, "ipaddress": "string", "port": "string", "experiment_name": "e1", "run_name": "run1", "run_path": "projects/p1/e1/runs/run1", "experiment_path": "projects/p1/e1", "number_of_rounds": 0}
+{"number_of_epochs": 0, "batch_size": 0, "ipaddress": "string", "port": "string", "experiment_name": "e1", "run_name": "run1", "run_path": "projects/p1/e1/runs/run1", "experiment_path": "projects/p1/e1", "number_of_rounds": 0, "number_of_clients": 1}

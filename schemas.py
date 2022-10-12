@@ -8,8 +8,10 @@ from pydantic import BaseModel
 
 class RunClients(BaseModel):
     
-    client_names:List
+    client_ip:List
+    client_port:List
     token:str
+    run_name:str
 
 
 
